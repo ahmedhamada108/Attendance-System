@@ -52,13 +52,19 @@ class Check_InOutController extends Controller
                 }else{
                     $login_date = $EmployeeDay->first()->login_date;
                     $logout_date = $EmployeeDay->first()->logout_date;
-                    $TotalHours = Carbon::parse($login_date)->diffInRealHours(Carbon::parse($logout_date)); 
-
+                    $TotalHours = Carbon::parse($login_date)->diffInRealHours(Carbon::parse($logout_date));
+                    $Basic_hours = employees::with('department:id,working_hours')->first()->department->working_hours;
+                    $over_time_hours = $TotalHours - $Basic_hours;
+                    $hour_price = employees::find(auth('employees_api')->id())->first('hour_price')->hour_price;
                     $EmployeeDay->update([
                         'logout_date'=> date('Y-m-d H:i:s.u'),
-                        'working_hours'=> $TotalHours
+                        'working_hours'=> $TotalHours,
+                        'over_time_hours' => ($over_time_hours < 0) ? 0 : $over_time_hours,
+                        'over_time_price' => ($over_time_hours < 0) ? 0 : $over_time_hours * 2 * $hour_price,
+                        'Day_Price' => ($over_time_hours < 0) ? $TotalHours * $hour_price : $over_time_hours * 2 * $hour_price
                     ]);
                     return $this->returnSuccessMessage('Check-Out Successfully','S000');
+                    // return $hour_price;
                 }    
             }else{
                 return $this->returnError('E500', 'Please login to your account');

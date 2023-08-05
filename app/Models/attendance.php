@@ -15,6 +15,7 @@ class attendance extends Model
         'login_date',
         'logout_date',
         'working_hours',
+        'over_time_hours',
         'created_at',
         'updated_at'
     ];

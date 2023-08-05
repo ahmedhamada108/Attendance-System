@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Heads;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseTrait;
+use App\Models\attendance;
 use App\Models\departments;
 use App\Models\employees;
 use App\Models\request_leaving;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 class EmployeesActionsController extends Controller
 {
     use ResponseTrait;
+
     public function ListJoinRequest(){
         try{
             if(auth('heads_api')->id() != null){
@@ -63,21 +65,7 @@ class EmployeesActionsController extends Controller
             return $this->returnError($ex->getCode(), $ex->getMessage());
         }
     }
-    public function ListLeavingRequest(){
-        try{
-            if(auth('heads_api')->id() != null){
-                $requests=  request_leaving::with('employee:id,name')->
-                select(['id','employee_id','leaving_date','reason','status'])->
-                get();
-                return $this->returnData('Requests Leaving',$requests,'Success');
-            }else{
-                return $this->returnError('E500', 'Please login to your account');
-                // check login Head
-            }
-        }catch (\Exception $ex) {
-            return $this->returnError($ex->getCode(), $ex->getMessage());
-        }
-    }
+
     public function UpdateLeavingStatusRequest(Request $request){
         try{
             if(auth('heads_api')->id() != null){
@@ -112,4 +100,25 @@ class EmployeesActionsController extends Controller
         }
     }
 
+    public function GetTotalHoursWorkingByMonth(Request $request){
+        try{
+            if(auth('heads_api')->id() != null){
+                $validator = Validator::make($request->all(), [
+                    'employee_id' => 'required',
+                    'month' => 'required',
+                ]);
+                if ($validator->fails()) {
+                    $code = $this->returnCodeAccordingToInput($validator);
+                    return $this->returnValidationError($code, $validator);
+                }
+                    $GetTotalHoursWorkingByMonth= attendance::GetTotalHoursWorkingByMonth($request->employee_id,$request->month)->get();
+                    return $this->returnData("Get Total Hours Working",$GetTotalHoursWorkingByMonth);
+            }else{
+                return $this->returnError('E500', 'Please login to your account');
+                // check login Employee
+            }
+        }catch (\Exception $ex) {
+            return $this->returnError($ex->getCode(), $ex->getMessage());
+        }
+    }
 }

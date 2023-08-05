@@ -12,6 +12,7 @@ class departments extends Model
         'id',
         'name',
         'head_id',
+        'working_hours',
         'created_at',
         'updated_at'
     ];

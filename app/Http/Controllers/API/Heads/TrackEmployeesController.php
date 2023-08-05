@@ -27,7 +27,20 @@ class TrackEmployeesController extends Controller
         }
 
     }
+    public function ListRequests(){
+        try{
+            if(auth('heads_api')->id() != null){
+                $GetRequests= request_leaving::GetRequests();
+                return $this->returnData('Get Requests',$GetRequests);
+            }else{
+                return $this->returnError('E500', 'Please login to your account');
+                // check login Employee
+            }
+        }catch (\Exception $ex) {
+            return $this->returnError($ex->getCode(), $ex->getMessage());
+        }
 
+    }
     public function ListAttendsToday(){
         try{
             if(auth('heads_api')->id() != null){
@@ -92,5 +105,6 @@ class TrackEmployeesController extends Controller
             return $this->returnError($ex->getCode(), $ex->getMessage());
         }
     }
+
     
 }

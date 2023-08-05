@@ -17,6 +17,9 @@ class employees extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'hour_price',
+        'Day_Price',
+        'over_time_price',
         'department_id',
         'status',
         'created_at',
@@ -32,6 +35,12 @@ class employees extends Authenticatable implements JWTSubject
     public static function ListEmployees(){
         $employees= employees::with('department:id,name as dept_name')->
         select(['id','name','email','department_id','status'])->get();
+        $employees = $employees->map(function ($item) {
+            $item->dept_name = $item->department->dept_name;
+            unset($item->department);
+            unset($item->department_id);
+            return $item;
+        });
         return $employees;
     }
     public static function ListEmployeesByDepartment($department_id){
